@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi TKA PKWU SMK - Skala Kemendikdasmen (200 - 800)</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #2563eb;
+            --secondary: #0f766e;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --border: #cbd5e1;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #d97706;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding-bottom: 40px;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .header-title p {
+            font-size: 0.85rem;
+            opacity: 0.85;
+        }
+
+        .timer-box {
+            background-color: #ef4444;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 24px auto;
+            padding: 0 16px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--bg);
+        }
+
+        .badge {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .stimulus {
+            background: #f1f5f9;
+            padding: 16px;
+            border-left: 4px solid var(--primary-light);
+            border-radius: 4px;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+            text-align: justify;
+        }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 16px;
+            font-size: 1rem;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-item:hover {
+            background-color: #f8fafc;
+            border-color: var(--primary-light);
+        }
+
+        .option-item input {
+            margin-top: 4px;
+        }
+
+        table.tf-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        table.tf-table th, table.tf-table td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        table.tf-table th {
+            background-color: #f1f5f9;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .nav-btn {
+            padding: 10px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn.answered {
+            background-color: var(--primary-light);
+            color: white;
+            border-color: var(--primary-light);
+        }
+
+        .nav-btn.active {
+            outline: 2px solid var(--primary);
+        }
+
+        .action-btns {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+            width: 100%;
+            margin-top: 16px;
+        }
+
+        .result-box {
+            display: none;
+            text-align: center;
+        }
+
+        .score-card {
+            background: #f0f9ff;
+            border: 2px solid #0284c7;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+        }
+
+        .score-display {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .score-category {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+
+        .cat-istimewa { background: #dcfce7; color: #15803d; }
+        .cat-baik { background: #dbeafe; color: #1d4ed8; }
+        .cat-memadai { background: #fef3c7; color: #b45309; }
+        .cat-kurang { background: #fee2e2; color: #b91c1c; }
+
+        .explanation {
+            margin-top: 12px;
+            padding: 12px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #166534;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">
+            <h1>Simulasi TKA PKWU SMK</h1>
+            <p>Standar Asesmen Kemendikdasmen (Skala 200 - 800)</p>
+        </div>
+        <div class="timer-box" id="timer">60:00</div>
+    </header>
+
+    <div class="container" id="quiz-container">
+        <main class="card">
+            <div class="question-header">
+                <span class="question-number" id="q-number" style="font-weight: 700; color: var(--primary);">Soal 1 dari 25</span>
+                <span class="badge" id="q-type">Pilihan Ganda</span>
+            </div>
+
+            <div class="stimulus" id="q-stimulus"></div>
+            <div class="question-text" id="q-text"></div>
+            <div id="q-options"></div>
+
+            <div class="action-btns">
+                <button class="btn btn-secondary" id="btn-prev" onclick="changeQuestion(-1)">Sebelumnya</button>
+                <button class="btn btn-primary" id="btn-next" onclick="changeQuestion(1)">Selanjutnya</button>
+            </div>
+        </main>
+
+        <aside>
+            <div class="card">
+                <h3 style="font-size: 1rem; margin-bottom: 12px;">Navigasi Soal</h3>
+                <div class="nav-grid" id="nav-grid"></div>
+                <button class="btn btn-success" onclick="submitExam()">Selesaikan Ujian</button>
+            </div>
+        </aside>
+    </div>
+
+    <div class="container result-box" id="result-container">
+        <main class="card" style="grid-column: 1 / -1;">
+            <h2>Sertifikat Latihan Hasil TKA PKWU SMK</h2>
+            <p style="font-size: 0.9rem; color: #64748b;">Standar Penilaian Kemendikdasmen (Model IRT Skala 200 - 800)</p>
+
+            <div class="score-card">
+                <div style="font-size: 1.1rem; color: #0369a1; font-weight: 600;">Skor Akhir TKA Anda:</div>
+                <div class="score-display" id="final-score">200</div>
+                <div id="category-badge" class="score-category cat-kurang">Kurang</div>
+                <p id="score-description" style="margin-top: 15px; font-size: 0.95rem;"></p>
+            </div>
+
+            <hr style="margin: 24px 0; border: 0; border-top: 1px solid var(--border);">
+            <h3 style="text-align: left; margin-bottom: 16px;">Evaluasi dan Pembahasan Soal</h3>
+            <div id="review-container" style="text-align: left;"></div>
+        </main>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                id: 1,
+                type: "single",
+                typeText: "Pilihan Ganda",
+                stimulus: "Sebuah kelompok wirausaha siswa memproduksi tote bag berbahan kanvas dengan teknik pewarnaan alami ecoprint (mencetak motif dari dedaunan asli). Pada batch produksi sebelumnya, mereka menerima banyak pengembalian barang dari pelanggan karena motif daun memudar drastis setelah pencucian dan ukuran kain kanvas menyusut sehingga bentuk tas tidak simetris.",
+                question: "Berdasarkan masalah tersebut, tindakan pengendalian mutu paling tepat yang harus diterapkan pada proses produksi selanjutnya adalah ....",
+                options: [
+                    "A. mengganti bahan kanvas dengan kain poliester dan menggunakan pewarna sintetis agar warna tidak mudah luntur",
+                    "B. membakukan proses fiksasi menggunakan tawas atau tunjung dan melakukan proses pre-wash pada kain kanvas sebelum dijahit",
+                    "C. memberikan garansi penukaran produk dan memperketat penanganan keluhan pelanggan setelah produk diterima konsumen",
+                    "D. meningkatkan suhu saat proses pengukusan daun dan segera mengemas tas dalam plastik kedap udara setelah proses penjahitan selesai",
+                    "E. menyortir ukuran dedaunan secara ketat dan merendam kain kanvas ke dalam cairan pewangi sebelum proses pencetakan motif"
+                ],
+                key: 1,
+                explanation: "Fiksasi tawas/tunjung mengunci warna alami ecoprint pada serat kain, sedangkan pre-wash mencuci kain sebelum dijahit agar penyusutan terjadi sebelum pemotongan pola."
+            },
+            {
+                id: 2,
+                type: "single",
+                typeText: "Pilihan Ganda",
+                stimulus: "Kelompok wirausaha siswa memproduksi coco pot (pot tanaman ramah lingkungan) dari limbah sabut kelapa. Pot ini telah melalui tahap pemeriksaan kualitas awal dengan hasil cetakan yang rapi dan kokoh secara fisik. Namun, setelah dipasarkan, konsumen pembibit outdoor mengeluhkan pot terlalu cepat rapuh dan rusak setelah terkena hujan deras selama beberapa hari.",
+                question: "Berdasarkan konsep pengembangan dan perbaikan mutu produk, tindakan perbaikan mutu paling tepat yang harus dilakukan adalah ....",
+                options: [
+                    "A. memperketat proses penyortiran akhir untuk memastikan pot yang retak atau lembap tidak dikirim kepada konsumen",
+                    "B. memperlama durasi penjemuran pot di bawah sinar matahari saat proses produksi untuk memastikan tidak ada kelembapan tersisa",
+                    "C. mengganti bahan baku utama sabut kelapa dengan plastik daur ulang agar pot memiliki daya tahan yang jauh lebih kuat",
+                    "D. menambahkan instruksi khusus pada kemasan produk agar konsumen hanya menggunakan pot tersebut di area pembibitan tertutup",
+                    "E. mengevaluasi komposisi bahan dengan menambahkan perekat alami agar pot lebih tahan air namun tetap dapat terurai"
+                ],
+                key: 4,
+                explanation: "Mereformulasi perekat alami tahan air memperkuat daya tahan fisik pot dari terpaan air hujan tanpa mengorbankan sifat biodegradable utama."
+            },
+            {
+                id: 3,
+                type: "single",
+                typeText: "Pilihan Ganda",
+                stimulus: "UMKM Oven Bunda memproduksi berbagai jenis roti manis dan roti tawar segar setiap hari. Pemilik UMKM tidak menggunakan jasa distributor atau agen besar karena umur simpan produknya singkat. Setiap pagi, roti diantarkan dan dititipkan (konsinyasi) kepada berbagai kantin sekolah, warung, dan minimarket di sekitar kota.",
+                question: "Berdasarkan ilustrasi tersebut, jenis saluran distribusi yang diterapkan oleh UMKM Oven Bunda adalah ....",
+                options: [
+                    "A. saluran distribusi langsung",
+                    "B. saluran distribusi semi langsung",
+                    "C. saluran distribusi tidak langsung tingkat satu",
+                    "D. saluran distribusi tidak langsung tingkat dua",
+                    "E. saluran distribusi tidak langsung tingkat tiga"
+                ],
+                key: 2,
+                explanation: "Saluran melibatkan tepat satu perantara ritel (kantin/warung) sebelum sampai ke konsumen akhir, sehingga merupakan distribusi tidak langsung tingkat satu."
+            },
+            {
+                id: 4,
+                type: "single",
+                typeText: "Pilihan Ganda",
+                stimulus: "Anton rutin mengamati produk popular di marketplace. Menjelang musim penghujan, sarung sepatu anti air banyak dicari. Namun penjual dari luar daerah membutuhkan pengiriman beberapa hari, sedangkan ulasan konsumen menunjukkan mereka butuh cepat untuk bekerja/bepergian.",
+                question: "Berdasarkan hasil pengamatan tersebut, keputusan usaha yang paling tepat dilakukan Anton adalah ....",
+                options: [
+                    "A. menjual sarung sepatu anti air dengan sistem pre-order untuk menekan biaya modal awal",
+                    "B. menjadi dropshipper dari toko yang sudah menjual sarung sepatu tersebut tanpa perlu menyediakan persediaan barang",
+                    "C. mencari pemasok yang dapat menyediakan sarung sepatu anti air secara lokal dan menjualnya dengan sistem ready stock",
+                    "D. mengganti produk yang akan dijual dengan payung dan jas hujan karena kedua produk juga banyak digunakan",
+                    "E. membeli berbagai jenis produk perlengkapan musim hujan dalam jumlah besar agar dapat memenuhi semua kebutuhan"
+                ],
+                key: 2,
+                explanation: "Langkah ini mengekspos kebutuhan pelanggan akan kecepatan (lokal ready stock) untuk mengungguli toko luar daerah."
+            },
+            {
+                id: 5,
+                type: "tf_matrix",
+                typeText: "Tabel Benar / Salah",
+                stimulus: "Analisis SWOT Usaha FreshCup: Harga terjangkau & bahan lokal mudah didapat. Memiliki keterbatasan hanya 1 mesin sealer. Ada beberapa kedai minuman sejenis di sekitar lokasi. Peluang pesan-antar daring makin meningkat. Terdapat risiko kenaikan harga susu dan gula.",
+                question: "Tentukan Benar atau Salah untuk setiap pernyataan berikut!",
+                statements: [
+                    "Harga produk yang terjangkau dan kemudahan bahan baku merupakan Kekuatan (Strength).",
+                    "Adanya beberapa kedai minuman sejenis di sekitar lokasi merupakan Kelemahan (Weakness).",
+                    "Peluang pemasaran via pesan-antar adalah Peluang (Opportunity), sedangkan potensi kenaikan harga bahan adalah Ancaman (Threat)."
+                ],
+                key: [true, false, true],
+                explanation: "Adanya kedai sejenis di luar organisasi merupakan faktor eksternal negatif, yaitu Ancaman (Threat), bukan Kelemahan (Weakness)."
+            },
+            {
+                id: 6,
+                type: "single",
+                typeText: "Pilihan Ganda",
+                stimulus: "Kelompok siswa SMK mengembangkan usaha 'Granola Bites'. Sebelum mengajukan ke koperasi sekolah, mereka telah menjelaskan latar belakang, target pasar, keunggulan, dan strategi promosi. Koperasi meminta tambahan analisis kuantitatif mengenai kelayakan usaha dan BEP.",
+                question: "Bagian proposal yang paling tepat untuk memenuhi kebutuhan informasi tersebut adalah ....",
+                options: [
+                    "A. rencana produksi",
+                    "B. rencana pemasaran",
+                    "C. rencana anggaran dan proyeksi keuangan",
+                    "D. analisis pasar",
+                    "E. rencana pelaksanaan usaha"
+                ],
+                key: 2,
+                explanation: "Analisis kualitatif modal awal, perkiraan laba rugi, cash flow, serta titik impas (BEP) dimuat dalam bagian Rencana Anggaran dan Proyeksi Keuangan."
+            },
+            {
+                id: 7,
+                type: "single",
+                typeText: "Pilihan Ganda",
+                stimulus: "Raka merancang botol kemasan kaca heksagonal bertekstur estetis untuk madu produknya. Ia juga mendaftarkan logo eksklusif dan memakai nama 'Madu Heksagon'.",
+                question: "Berdasarkan karakteristik HAKI, bentuk perlindungan yang paling tepat secara berturut-turut adalah ....",
+                options: [
+                    "A. Hak Cipta dan Hak Paten",
+                    "B. Desain Industri dan Merek",
+                    "C. Hak Paten dan Merek",
+                    "D. Paten Sederhana dan Hak Cipta",
+                    "E. Hak Cipta dan Merek"
+                ],
+                key: 1,
+                explanation: "Bentuk dan tampilan visual 3D wadah dilindungi Desain Industri; sedangkan nama dagang dan logo dilindungi Merek."
+            },
+            {
+                id: 8,
+                type: "multiple",
+                typeText: "Pilihan Ganda Kompleks",
+                stimulus: "UMKM LokaBox mengembangkan produk kotak bekal: (1) Ilustrasi orisinal cetak di tutup, (2) Mekanisme pengunci baru anti bocor, (3) Nama merek 'LokaBox' dan logo, (4) Bentuk visual luar 3D yang estetis, (5) Video tutorial penggunaan produk.",
+                question: "Manakah pernyataan HAKI yang benar? (Jawaban lebih dari satu)",
+                options: [
+                    "A. Ilustrasi orisinal dapat memperoleh perlindungan Hak Cipta, sedangkan merek/logo memperoleh Merek.",
+                    "B. Mekanisme pengunci teknis dapat diusulkan Paten, sedangkan video tutorial memperoleh Hak Cipta.",
+                    "C. Bentuk dan konfigurasi luar yang estetis memperoleh Desain Industri, sedangkan video memperoleh Hak Cipta.",
+                    "D. Nama dan logo LokaBox dilindungi Paten karena merupakan identitas pembeda.",
+                    "E. Mekanisme pengunci dapat dilindungi Merek."
+                ],
+                key: [0, 1, 2],
+                explanation: "A, B, C benar. Nama/Logo di bawah UU Merek (D salah) dan mekanisme teknis fungsi di bawah UU Paten (E salah)."
+            },
+            {
+                id: 9,
+                type: "tf_matrix",
+                typeText: "Tabel Benar / Salah",
+                stimulus: "Kasus UMKM RasaLoka ('Sambal Loka'): (1) Toko daring lain tanpa izin menggunakan nama Sambal Loka, (2) Penggunaan foto & video promosi resmi tanpa izin, (3) Pihak pesaing meniru bentuk logo secara sangat mirip.",
+                question: "Tentukan Benar atau Salah pengkategorian masalah HAKI berikut!",
+                statements: [
+                    "Penggunaan nama Sambal Loka oleh toko daring lain dikategorikan sebagai masalah Merek.",
+                    "Penggunaan foto produk dan materi promosi tanpa izin dikategorikan sebagai masalah Hak Cipta.",
+                    "Penggunaan logo yang sangat mirip dikategorikan sebagai masalah Paten."
+                ],
+                key: [true, true, false],
+                explanation: "Logo adalah indentitas pembeda produk yang dilindungi oleh UU Merek, bukan Paten."
+            },
+            {
+                id: 10,
+                type: "multiple",
+                typeText: "Pilihan Ganda Kompleks",
+                stimulus: "Data Transaksi SegarKita September 2026: Modal awal kas Rp8.000.000, Beli peralatan tunai Rp2.500.000, Beli bahan baku tunai Rp1.500.000, Sewa tempat Rp1.000.000, Pendapatan penjualan tunai Rp5.000.000, Biaya listrik/air Rp500.000, Biaya promosi Rp300.000.",
+                question: "Pilihlah pernyataan akuntansi yang benar! (Jawaban lebih dari satu)",
+                options: [
+                    "A. Total pendapatan usaha selama September 2026 adalah Rp5.000.000,00.",
+                    "B. Total beban usaha yang tercatat adalah Rp1.800.000,00.",
+                    "C. Laba usaha selama September 2026 adalah Rp3.200.000,00.",
+                    "D. Saldo kas akhir September 2026 adalah Rp7.200.000,00.",
+                    "E. Nilai peralatan sebesar Rp2.500.000,00 dicatat sebagai beban usaha."
+                ],
+                key: [0, 1, 2, 3],
+                explanation: "Beban usaha = Sewa(1jt) + Listrik(500rb) + Promosi(300rb) = 1,8jt. Laba = 5jt - 1,8jt = 3,2jt. Saldo kas = 8jt + 5jt - (2,5jt+1,5jt+1jt+500rb+300rb) = 7,2jt. Peralatan adalah Aset Tetap."
+            },
+            {
+                id: 11,
+                type: "multiple",
+                typeText: "Pilihan Ganda Kompleks",
+                stimulus: "Data Posisi Keuangan Kriuk Rasa: Kas Rp9.000.000, Piutang Rp2.000.000, Persediaan Rp4.000.000, Peralatan Rp10.000.000, Utang Usaha Rp5.000.000, Pendapatan Rp16.000.000, Beban Usaha Rp11.000.000.",
+                question: "Pilihlah pernyataan keuangan yang tepat! (Jawaban lebih dari satu)",
+                options: [
+                    "A. Usaha memperoleh laba sebesar Rp5.000.000,00.",
+                    "B. Piutang usaha Rp2.000.000,00 termasuk aset karena merupakan hak tagih.",
+                    "C. Utang usaha Rp5.000.000,00 termasuk aset perusahaan.",
+                    "D. Persediaan Rp4.000.000,00 dan Peralatan Rp10.000.000,00 tergolong aset.",
+                    "E. Total aset usaha adalah Rp9.000.000,00."
+                ],
+                key: [0, 1, 3],
+                explanation: "Laba = 16jt - 11jt = 5jt. Utang merupakan Liabilitas/Kewajiban. Total Aset = 9+2+4+10 = 25jt."
+            },
+            {
+                id: 12,
+                type: "single",
+                typeText: "Pilihan Ganda",
+                stimulus: "Kopi Senja: Modal awal Rp23.000.000. Pendapatan Sept Rp18.000.000, Beban Sept Rp13.000.000. Posisi per 30 Sept: Kas Rp12.000.000, Piutang Rp3.000.000, Persediaan Rp5.000.000, Peralatan Rp15.000.000, Utang Rp7.000.000.",
+                question: "Simpulan paling tepat mengenai kinerja dan posisi keuangan akhir September adalah ....",
+                options: [
+                    "A. Usaha memperoleh laba Rp5.000.000,00, total aset Rp35.000.000,00, dan ekuitas akhir Rp28.000.000,00",
+                    "B. Usaha memperoleh laba Rp5.000.000,00, total aset Rp35.000.000,00, dan ekuitas akhir Rp23.000.000,00",
+                    "C. Usaha mengalami rugi Rp5.000.000,00, total aset Rp35.000.000,00, dan ekuitas akhir Rp28.000.000,00",
+                    "D. Usaha memperoleh laba Rp5.000.000,00, total aset Rp28.000.000,00, dan ekuitas akhir Rp35.000.000,00",
+                    "E. Usaha memperoleh laba Rp5.000.000,00, total aset Rp35.000.000,00, dan ekuitas akhir Rp42.000.000,00"
+                ],
+                key: 0,
+                explanation: "Laba = 18-13 = 5jt. Aset = 12+3+5+15 = 35jt. Ekuitas Akhir = Modal Awal (23jt) + Laba (5jt) = 28jt."
+            },
+            {
+                id: 13,
+                type: "single",
+                typeText: "Pilihan Ganda",
+                stimulus: "Pak Hasan menulis prosedur kerja baku penyangraian biji kopi: suhu 200°C selama 15 menit, pendinginan 30 menit, penggilingan halus, dan penyaringan sebelum dikemas.",
+                question: "Aturan tertulis mengenai langkah kerja tersebut merupakan komponen proses produksi berupa ....",
+                options: [
+                    "A. bahan baku produksi",
+                    "B. modal usaha produksi",
+                    "C. peralatan produksi",
+                    "D. tenaga kerja produksi",
+                    "E. metode kerja produksi"
+                ],
+                key: 4,
+                explanation: "Prosedur operasional standar (SOP) pengerjaan teknis merupakan bentuk Metode Kerja (Method)."
+            },
+            {
+                id: 14,
+                type: "multiple",
+                typeText: "Pilihan Ganda Kompleks",
+                stimulus: "Output produksi Bakso 'Laut Biru' merosot dari 300 menjadi 180 bungkus/hari. Temuan: (1) Ikan dari pemasok datang siang & kurang segar, (2) Mesin penggiling sering macet, (3) 2 pekerja baru belum terlatih dan lambat.",
+                question: "Komponen produksi yang menjadi sumber masalah utama adalah .... (Jawaban lebih dari satu)",
+                options: [
+                    "A. metode kerja",
+                    "B. bahan baku",
+                    "C. modal usaha",
+                    "D. tenaga kerja",
+                    "E. peralatan produksi"
+                ],
+                key: [1, 3, 4],
+                explanation: "Masalah berasal dari Pasokan Bahan Baku (ikan), Tenaga Kerja (kurang terampil), dan Peralatan (mesin macet)."
+            },
+            {
+                id: 15,
+                type: "single",
+                typeText: "Pilihan Ganda",
+                stimulus: "Usaha Kriya Gading memproduksi cangkir tanah liat. 14 dari 40 cangkir retak saat pembakaran. Evaluasi: tanah liat sudah diayak halus, dikeringkan 5 hari, namun suhu tungku langsung dinaikkan ke 1.000°C dalam 1 jam.",
+                question: "Solusi teknis paling tepat untuk mengurangi keretakan adalah ....",
+                options: [
+                    "A. menaikkan suhu tungku secara bertahap selama proses pembakaran berlangsung",
+                    "B. menambah waktu pengeringan cangkir menjadi dua minggu",
+                    "C. mengganti bahan tanah liat dengan jenis impor yang lebih mahal",
+                    "D. menambah jumlah cangkir yang dibakar dalam tungku",
+                    "E. menebalkan dinding cangkir tanah liat"
+                ],
+                key: 0,
+                explanation: "Kenaikan suhu drastis memicu thermal shock. Suhu harus dinaikkan secara bertahap (gradual heating)."
+            },
+            {
+                id: 16,
+                type: "tf_matrix",
+                typeText: "Tabel Benar / Salah",
+                stimulus: "Bubur Sehat Nusa (Pasar Lansia): Dikemas dalam bungkus plastik besar 20 porsi tanpa sobekan awal & huruf petunjuk kecil. Survei: lansia kesulitan membaca petunjuk, kesulitan membuka bungkus, dan hanya mengonsumsi 1 porsi per makan.",
+                question: "Tentukan Benar atau Salah penyesuaian kemasan berikut!",
+                statements: [
+                    "Menyediakan kemasan saset yang berisi 1 porsi sekali makan.",
+                    "Menambahkan sobekan awal (tear notch) dan memperbesar ukuran huruf petunjuk.",
+                    "Menambah isi bungkus menjadi 40 porsi agar lebih hemat."
+                ],
+                key: [true, true, false],
+                explanation: "Pernyataan 3 Salah karena menambah isi justru memperparah penggumpalan lembap dan memberatkan lansia."
+            },
+            {
+                id: 17,
+                type: "single",
+                typeText: "Pilihan Ganda",
+                stimulus: "Usaha Teh Rosela ingin masuk ke jaringan swalayan modern. Label produk wajib memenuhi standar kelayakan dan legalitas keamanan pangan olahan dari pemerintah.",
+                question: "Informasi wajib yang harus ditambahkan pada kemasan adalah ....",
+                options: [
+                    "A. nama produk dan isi bersih",
+                    "B. daftar bahan dan kode produksi",
+                    "C. alamat produsen dan daftar bahan",
+                    "D. tanggal kedaluwarsa dan nomor izin edar (P-IRT/BPOM)",
+                    "E. isi bersih dan tanggal kedaluwarsa"
+                ],
+                key: 3,
+                explanation: "Dua elemen legalitas mendasar paling krusial untuk ritel modern adalah Tanggal Kedaluwarsa dan Nomor Izin Edar resmi."
+            },
+            {
+                id: 18,
+                type: "multiple",
+                typeText: "Pilihan Ganda Kompleks",
+                stimulus: "Madu Kampung botol kaca 500 ml: 12 dari 80 botol pecah saat dikirim via ekspedisi dan tutup botol dikeluhkan sulit dibuka. Pemilik berencana mendesain kemasan baru.",
+                question: "Manakah langkah pengembangan prototipe kemasan yang tepat? (Jawaban lebih dari satu)",
+                options: [
+                    "A. Membuat sampel dari botol plastik tebal (PET/HDPE) dan mengujinya melalui simulasi jatuh/pengiriman.",
+                    "B. Meminta sampel pelanggan menguji kemudahan membuka tutup botol.",
+                    "C. Memperbesar ukuran botol menjadi 1 liter.",
+                    "D. Menetapkan desain akhir secara massal sebelum diuji oleh pelanggan.",
+                    "E. Memperbaiki contoh kemasan berdasarkan hasil pengujian sebelum produksi massal."
+                ],
+                key: [0, 1, 4],
+                explanation: "Langkah terstruktur meliputi pembuatan prototipe material baru, pengujian teknis & pelanggan, serta revisi sebelum produksi massal."
+            },
+            {
+                id: 19,
+                type: "single",
+                typeText: "Pilihan Ganda",
+                stimulus: "Usaha Stik Keju menerima pesanan 22.000 bungkus/bulan. Kapasitas 1 pekerja = 40 bungkus/jam. Jam kerja = 5 jam/hari. Hari kerja = 24 hari/bulan.",
+                question: "Jumlah pekerja minimum yang harus disiapkan adalah ....",
+                options: [
+                    "A. 4 orang",
+                    "B. 5 orang",
+                    "C. 6 orang",
+                    "D. 7 orang",
+                    "E. 8 orang"
+                ],
+                key: 1,
+                explanation: "Output 1 pekerja/bulan = 40 x 5 x 24 = 4.800 bungkus. Kebutuhan = 22.000 / 4.800 = 4,58 orang. Dibulatkan ke atas = 5 orang."
+            },
+            {
+                id: 20,
+                type: "single",
+                typeText: "Pilihan Ganda",
+                stimulus: "Pia Legit Mbak Ratih (500 kotak/bulan): Bahan Baku Rp3.000.000, Kemasan Rp600.000, Upah Pembuat Pia Rp1.800.000, Biaya Utilitas/Dapur Rp600.000, Iklan Sosmed Rp400.000, Gaji Kasir Rp300.000.",
+                question: "Berdasarkan akuntansi biaya, Biaya Produksi (HPP) per kotak pia bulan Mei adalah ....",
+                options: [
+                    "A. Rp9.600,00",
+                    "B. Rp10.800,00",
+                    "C. Rp12.000,00",
+                    "D. Rp12.800,00",
+                    "E. Rp13.400,00"
+                ],
+                key: 2,
+                explanation: "Biaya Produksi = 3jt + 600rb + 1,8jt + 600rb = Rp6.000.000. HPP/kotak = 6.000.000 / 500 = Rp12.000,00. (Promosi & Kasir = Biaya Operasional Penjualan)."
+            },
+            {
+                id: 21,
+                type: "tf_matrix",
+                typeText: "Tabel Benar / Salah",
+                stimulus: "Praline Kita (Rp85.000/kotak): Promosi via spanduk pasar tradisional & brosur fisik hanya menghasilkan penjualan 9 dari 100 kotak. Di Instagram, 14 anak muda (20-35 th) menanyakan paket hadiah, namun akun lambat membalas.",
+                question: "Tentukan Benar atau Salah pernyataan evaluasi pemasaran berikut!",
+                statements: [
+                    "Menurunkan harga jadi Rp40.000,00 per kotak merupakan solusi utama.",
+                    "Terjadi ketidaksesuaian saluran promosi antara spanduk fisik dan segmen anak muda di Instagram.",
+                    "Pertanyaan 14 calon pembeli membuktikan kemasan boks kurang menarik."
+                ],
+                key: [false, true, false],
+                explanation: "Masalah utama terletak pada mismatch saluran promosi (offline vs online), bukan pada harga atau bentuk kemasan."
+            },
+            {
+                id: 22,
+                type: "multiple",
+                typeText: "Pilihan Ganda Kompleks",
+                stimulus: "Dimsum Ibu Wati (Rp32.000/kantong): Pelanggan utama pekerja kantor (25-40 th) yang membeli 3+ kantong di marketplace. Mereka sering meminta diskon kuantitas dan pengiriman cepat ke alamat kantor.",
+                question: "Pilihlah strategi pemasaran terarah yang tepat! (Jawaban lebih dari satu)",
+                options: [
+                    "A. Menawarkan paket bundling pembelian 3 kantong via grup perpesanan pelanggan.",
+                    "B. Membuka gerai fisik di pasar tradisional.",
+                    "C. Menitipkan produk di koperasi/kantin perkantoran.",
+                    "D. Menampilkan ulasan positif dan jaminan higienis di media sosial.",
+                    "E. Memberikan diskon harga secara masif untuk semua produk setiap hari."
+                ],
+                key: [0, 2, 3],
+                explanation: "Paket bundling 3 kantong, konsinyasi area perkantoran, dan promosi kebersihan media sosial terbukti tepat sasaran."
+            },
+            {
+                id: 23,
+                type: "tf_matrix",
+                typeText: "Tabel Benar / Salah",
+                stimulus: "Bunga Abadi (Buket bunga kering Rp120.000): Penjualan melonjak saat Hari Ibu/Wisuda (60 buket/bulan), namun anjlok di bulan biasa (10 buket/bulan). Kafe lokal menanyakan buket hiasan meja.",
+                question: "Tentukan Benar atau Salah strategi penstabilan penjualan berikut!",
+                statements: [
+                    "Menawarkan program langganan penggantian buket bulanan kepada kafe.",
+                    "Membuat paket buket khusus acara ulang tahun dan lamaran.",
+                    "Memusatkan seluruh anggaran promosi hanya pada menjelang hari besar."
+                ],
+                key: [true, true, false],
+                explanation: "Memusatkan anggaran promosi hanya pada hari besar tidak menyelesaikan masalah kelesuan arus kas di bulan biasa."
+            },
+            {
+                id: 24,
+                type: "single",
+                typeText: "Pilihan Ganda",
+                stimulus: "TetesTani: Prototipe 2 unggul skor Kemudahan (4.6), Kepraktisan (4.4), dan Estetika (4.3), namun Kestabilan Aliran Tetes Prototipe 2 lebih rendah dibanding Prototipe 1 (3.1 vs 4.5).",
+                question: "Tindak lanjut pengembangan produk yang paling tepat adalah ....",
+                options: [
+                    "A. memproduksi prototipe 2 secara massal langsung",
+                    "B. memperbaiki pengatur aliran pada prototipe 2, lalu mengujinya kembali",
+                    "C. menurunkan harga jual prototipe 2 agar pembeli memaklumi",
+                    "D. membatalkan proyek dan kembali merancang dari sketsa awal",
+                    "E. menghentikan seluruh pengembangan"
+                ],
+                key: 1,
+                explanation: "Fokus merekayasa ulang komponen paling lemah (pengatur aliran) pada Prototipe 2, lalu melakukan pengujian ulang."
+            },
+            {
+                id: 25,
+                type: "single",
+                typeText: "Pilihan Ganda",
+                stimulus: "EcoTech (Biaya Tetap = Rp12jt/bln, Biaya Variabel = Rp150rb/unit, Harga Online = Rp250rb/unit, Penjualan = 100 unit/bln). Ada 2 penawaran: (1) Iklan digital Rp3jt/bln naikkan penjualan online 50%, (2) Distributor offline beli pasti 60 unit/bln harga borongan Rp210rb/unit tanpa biaya promosi.",
+                question: "Keputusan operasional paling tepat yang memberikan laba bersih operasional tertinggi adalah ....",
+                options: [
+                    "A. mempertahankan penjualan lama tanpa mengambil penawaran",
+                    "B. mengambil Opsi Iklan Digital saja",
+                    "C. mengambil Opsi Distributor Offline saja",
+                    "D. mengambil kedua penawaran (Iklan Digital & Distributor Offline) secara bersamaan",
+                    "E. menolak kedua penawaran dan menaikkan harga jual online"
+                ],
+                key: 3,
+                explanation: "Kombinasi kedua tawaran memberikan total marjin kontribusi Rp18,6jt dikurangi total biaya tetap Rp15jt, menghasilkan Laba Bersih Operasional maksimal sebesar Rp3.600.000,00 per bulan."
+            }
+        ];
+
+        let currentQ = 0;
+        let userAnswers = {};
+        let timeLeft = 3600;
+        let timerInterval;
+
+        function initQuiz() {
+            renderNavGrid();
+            loadQuestion(0);
+            startTimer();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                let m = Math.floor(timeLeft / 60);
+                let s = timeLeft % 60;
+                document.getElementById('timer').innerText = 
+                    `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Waktu ujian telah habis! Jawaban Anda akan otomatis diproses.");
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function renderNavGrid() {
+            const grid = document.getElementById('nav-grid');
+            grid.innerHTML = '';
+            questions.forEach((q, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `nav-btn ${userAnswers[idx] !== undefined ? 'answered' : ''}`;
+                btn.id = `nav-${idx}`;
+                btn.innerText = idx + 1;
+                btn.onclick = () => loadQuestion(idx);
+                grid.appendChild(btn);
+            });
+        }
+
+        function loadQuestion(idx) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`nav-${idx}`).classList.add('active');
+            
+            currentQ = idx;
+            const q = questions[idx];
+            
+            document.getElementById('q-number').innerText = `Soal ${idx + 1} dari ${questions.length}`;
+            document.getElementById('q-type').innerText = q.typeText;
+            document.getElementById('q-stimulus').innerText = q.stimulus;
+            document.getElementById('q-text').innerText = q.question;
+            
+            const optionsContainer = document.getElementById('q-options');
+            optionsContainer.innerHTML = '';
+
+            if (q.type === 'single') {
+                q.options.forEach((opt, oIdx) => {
+                    const div = document.createElement('div');
+                    div.className = 'option-item';
+                    const checked = userAnswers[idx] === oIdx ? 'checked' : '';
+                    div.innerHTML = `
+                        <input type="radio" name="opt-${idx}" id="opt-${oIdx}" value="${oIdx}" ${checked} onchange="saveAnswer(${idx}, ${oIdx})">
+                        <label for="opt-${oIdx}" style="cursor:pointer; width:100%;">${opt}</label>
+                    `;
+                    optionsContainer.appendChild(div);
+                });
+            } else if (q.type === 'multiple') {
+                const currentAns = userAnswers[idx] || [];
+                q.options.forEach((opt, oIdx) => {
+                    const div = document.createElement('div');
+                    div.className = 'option-item';
+                    const checked = currentAns.includes(oIdx) ? 'checked' : '';
+                    div.innerHTML = `
+                        <input type="checkbox" id="opt-${oIdx}" value="${oIdx}" ${checked} onchange="saveMultipleAnswer(${idx}, ${oIdx})">
+                        <label for="opt-${oIdx}" style="cursor:pointer; width:100%;">${opt}</label>
+                    `;
+                    optionsContainer.appendChild(div);
+                });
+            } else if (q.type === 'tf_matrix') {
+                const currentAns = userAnswers[idx] || {};
+                let tableHtml = `<table class="tf-table">
+                    <thead><tr><th>Pernyataan</th><th style="width:70px; text-align:center;">Benar</th><th style="width:70px; text-align:center;">Salah</th></tr></thead>
+                    <tbody>`;
+                q.statements.forEach((stmt, sIdx) => {
+                    const isTrueChecked = currentAns[sIdx] === true ? 'checked' : '';
+                    const isFalseChecked = currentAns[sIdx] === false ? 'checked' : '';
+                    tableHtml += `
+                        <tr>
+                            <td>${stmt}</td>
+                            <td style="text-align:center;"><input type="radio" name="tf-${idx}-${sIdx}" ${isTrueChecked} onchange="saveTFAnswer(${idx}, ${sIdx}, true)"></td>
+                            <td style="text-align:center;"><input type="radio" name="tf-${idx}-${sIdx}" ${isFalseChecked} onchange="saveTFAnswer(${idx}, ${sIdx}, false)"></td>
+                        </tr>
+                    `;
+                });
+                tableHtml += `</tbody></table>`;
+                optionsContainer.innerHTML = tableHtml;
+            }
+
+            document.getElementById('btn-prev').style.visibility = idx === 0 ? 'hidden' : 'visible';
+            document.getElementById('btn-next').style.visibility = idx === questions.length - 1 ? 'hidden' : 'visible';
+        }
+
+        function saveAnswer(qIdx, val) {
+            userAnswers[qIdx] = val;
+            document.getElementById(`nav-${qIdx}`).classList.add('answered');
+        }
+
+        function saveMultipleAnswer(qIdx, val) {
+            if (!userAnswers[qIdx]) userAnswers[qIdx] = [];
+            const arr = userAnswers[qIdx];
+            const pos = arr.indexOf(val);
+            if (pos > -1) arr.splice(pos, 1);
+            else arr.push(val);
+            
+            if (arr.length > 0) document.getElementById(`nav-${qIdx}`).classList.add('answered');
+            else document.getElementById(`nav-${qIdx}`).classList.remove('answered');
+        }
+
+        function saveTFAnswer(qIdx, sIdx, val) {
+            if (!userAnswers[qIdx]) userAnswers[qIdx] = {};
+            userAnswers[qIdx][sIdx] = val;
+            
+            if (Object.keys(userAnswers[qIdx]).length === questions[qIdx].statements.length) {
+                document.getElementById(`nav-${qIdx}`).classList.add('answered');
+            }
+        }
+
+        function changeQuestion(dir) {
+            let target = currentQ + dir;
+            if (target >= 0 && target < questions.length) loadQuestion(target);
+        }
+
+        function submitExam() {
+            if (confirm("Apakah Anda yakin ingin menyelesaikan ujian TKA PKWU ini?")) {
+                clearInterval(timerInterval);
+                document.getElementById('quiz-container').style.display = 'none';
+                document.getElementById('timer').style.display = 'none';
+                document.getElementById('result-container').style.display = 'block';
+
+                calculateTKA200to800Score();
+            }
+        }
+
+        function calculateTKA200to800Score() {
+            let rawPoints = 0;
+            let maxPoints = 0;
+            const reviewContainer = document.getElementById('review-container');
+            reviewContainer.innerHTML = '';
+
+            questions.forEach((q, idx) => {
+                let questionWeight = 4; // Bobot dasar tiap butir soal
+                maxPoints += questionWeight;
+                let isCorrect = false;
+                const userAns = userAnswers[idx];
+
+                if (q.type === 'single') {
+                    if (userAns === q.key) {
+                        isCorrect = true;
+                        rawPoints += questionWeight;
+                    }
+                } else if (q.type === 'multiple') {
+                    if (userAns && Array.isArray(userAns)) {
+                        const sortedUser = [...userAns].sort().join(',');
+                        const sortedKey = [...q.key].sort().join(',');
+                        if (sortedUser === sortedKey) {
+                            isCorrect = true;
+                            rawPoints += questionWeight;
+                        }
+                    }
+                } else if (q.type === 'tf_matrix') {
+                    if (userAns && typeof userAns === 'object') {
+                        let matches = 0;
+                        q.key.forEach((kVal, sIdx) => {
+                            if (userAns[sIdx] === kVal) matches++;
+                        });
+                        if (matches === q.key.length) {
+                            isCorrect = true;
+                            rawPoints += questionWeight;
+                        } else if (matches > 0) {
+                            // Parsial poin untuk matriks
+                            rawPoints += (matches / q.key.length) * questionWeight;
+                        }
+                    }
+                }
+
+                // Render Lembar Pembahasan
+                const itemDiv = document.createElement('div');
+                itemDiv.style.marginBottom = '20px';
+                itemDiv.style.padding = '14px';
+                itemDiv.style.border = '1px solid var(--border)';
+                itemDiv.style.borderRadius = '8px';
+                
+                itemDiv.innerHTML = `
+                    <div style="font-weight:bold; color: ${isCorrect ? 'var(--success)' : 'var(--danger)'}">
+                        Soal Nomor ${idx + 1}: ${isCorrect ? 'BENAR (Sesuai Kunci)' : 'SALAH / BELUM TEPAT'}
+                    </div>
+                    <div style="font-size:0.95rem; margin-top:6px;"><strong>Soal:</strong> ${q.question}</div>
+                    <div class="explanation"><strong>Pembahasan HOTS:</strong> ${q.explanation}</div>
+                `;
+                reviewContainer.appendChild(itemDiv);
+            });
+
+            // Formulasi Penyesuaian ke Skala Kemendikdasmen 200 - 800 (IRT Linear Scale Transformation)
+            // Rumus: Skor = 200 + ( (RawPoints / MaxPoints) * 600 )
+            let calculatedScore = Math.round(200 + ((rawPoints / maxPoints) * 600));
+
+            document.getElementById('final-score').innerText = calculatedScore;
+
+            // Kategori Capaian Kemendikdasmen
+            const badge = document.getElementById('category-badge');
+            const desc = document.getElementById('score-description');
+
+            if (calculatedScore >= 725) {
+                badge.innerText = "Sangat Baik / Istimewa (≥ 725)";
+                badge.className = "score-category cat-istimewa";
+                desc.innerHTML = "Selamat! Anda memiliki **penguasaan penalaran HOTS yang sangat tinggi** dan berada di tingkat kompetensi utama puncak.";
+            } else if (calculatedScore >= 600) {
+                badge.innerText = "Baik (600 - 724)";
+                badge.className = "score-category cat-baik";
+                desc.innerHTML = "Kerja Bagus! Anda mampu **menganalisis permasalahan usaha dan merancang solusi operasional** dengan presisi tinggi.";
+            } else if (calculatedScore >= 450) {
+                badge.innerText = "Memadai (450 - 599)";
+                badge.className = "score-category cat-memadai";
+                desc.innerHTML = "Capaian Anda berada pada kriteria **Cukup / Memadai**. Diperlukan pendalaman analisis pada materi laporan keuangan dan HAKI.";
+            } else {
+                badge.innerText = "Kurang (< 450)";
+                badge.className = "score-category cat-kurang";
+                desc.innerHTML = "Capaian Anda masih di tingkat **Perlu Intervensi Khusus**. Disarankan untuk berlatih pemecahan kasus studi kewirausahaan secara berkala.";
+            }
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
